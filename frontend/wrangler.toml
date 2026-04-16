@@ -1,0 +1,8 @@
+name = "etf-search-app"
+compatibility_date = "2024-04-16"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB" # 백엔드 코드에서 사용하는 이름
+database_name = "etf-db" # Cloudflare 대시보드에 표시되는 이름
+database_id = "b4cc9689-7f87-4a8e-ada5-e32132c8f81b" # 아까 확인한 실제 ID

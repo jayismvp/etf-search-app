@@ -22,18 +22,35 @@ fs.createReadStream(CSV_FILE_PATH)
       return `'${escaped}'`;
     };
 
+    // Helper to find value by partial key match (handles BOM/special chars)
+    const getVal = (item, targetKey) => {
+      const keys = Object.keys(item);
+      const foundKey = keys.find(k => k.toLowerCase().includes(targetKey.toLowerCase()));
+      return foundKey ? item[foundKey] : null;
+    };
+
     const sqlHeader = `DELETE FROM stocks;\n`;
     const sqlFooter = ``;
     
-    // Generate batches of INSERT statements for better performance
     let sqlContent = sqlHeader;
-    const batchSize = 100; // 1000 -> 100으로 줄임 (SQLITE_TOOBIG 방지)
+    const batchSize = 100;
     
     for (let i = 0; i < results.length; i += batchSize) {
       const batch = results.slice(i, i + batchSize);
       
       const values = batch.map(row => {
-        return `(${escape(row.stock_ticker)}, ${row.contract || 'NULL'}, ${row.amount || 'NULL'}, ${row.weight || 'NULL'}, ${escape(row.etf_ticker)}, ${escape(row.etf_name)}, ${escape(row.listing_date)}, ${escape(row.market)}, ${escape(row.asset)}, ${escape(row.underlying)}, ${escape(row.AP)}, ${escape(row.leverage)}, ${row.fee || 'NULL'}, ${row.NAV || 'NULL'}, ${row.active || 'NULL'}, ${escape(row.stock_name)}, ${escape(row.taxation)}, ${row['premium/discount'] || 'NULL'})`;
+        const sTicker = getVal(row, 'stock_ticker');
+        const sName = getVal(row, 'stock_name');
+        const eTicker = getVal(row, 'etf_ticker');
+        const eName = getVal(row, 'etf_name');
+        const lDate = getVal(row, 'listing_date');
+        const navVal = getVal(row, 'NAV');
+        const feeVal = getVal(row, 'fee');
+        const weightVal = getVal(row, 'weight');
+        const taxVal = getVal(row, 'taxation');
+        const premVal = getVal(row, 'premium/discount');
+        
+        return `(${escape(sTicker)}, ${row.contract || 'NULL'}, ${row.amount || 'NULL'}, ${weightVal || 'NULL'}, ${escape(eTicker)}, ${escape(eName)}, ${escape(lDate)}, ${escape(row.market)}, ${escape(row.asset)}, ${escape(row.underlying)}, ${escape(row.AP)}, ${escape(row.leverage)}, ${feeVal || 'NULL'}, ${navVal || 'NULL'}, ${row.active || 'NULL'}, ${escape(sName)}, ${escape(taxVal)}, ${premVal || 'NULL'})`;
       }).join(',\n');
       
       sqlContent += `INSERT INTO stocks (stock_ticker, contract, amount, weight, etf_ticker, etf_name, listing_date, market, asset, underlying, AP, leverage, fee, NAV, active, stock_name, taxation, premium_discount) VALUES \n${values};\n\n`;
