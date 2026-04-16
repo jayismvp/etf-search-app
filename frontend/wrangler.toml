@@ -1,9 +1,0 @@
-# Cloudflare Pages Configuration
-name = "etf-search-app"
-compatibility_date = "2024-04-16"
-pages_build_output_dir = "dist"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "etf-db"
-database_id = "b4cc9689-7f87-4a8e-ada5-e32132c8f81b"
