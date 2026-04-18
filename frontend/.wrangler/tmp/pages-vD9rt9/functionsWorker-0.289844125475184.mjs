@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../.wrangler/tmp/bundle-0cR2Lt/checked-fetch.js
+// ../.wrangler/tmp/bundle-ZouCHA/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -67,7 +67,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const query = url.searchParams.get("query");
-  if (!query) {
+  if (!query || query.trim() === "") {
     return new Response(JSON.stringify([]), {
       headers: { "Content-Type": "application/json" }
     });
@@ -85,8 +85,11 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
         fee, 
         weight 
       FROM stocks 
-      WHERE lower(stock_name) LIKE ? OR lower(stock_ticker) LIKE ?
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
+      WHERE lower(stock_name) LIKE ? 
+         OR lower(stock_ticker) LIKE ? 
+         OR lower(etf_name) LIKE ?
+      ORDER BY nav DESC
+    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`, `%${lowerQuery}%`).all();
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }
     });
@@ -643,7 +646,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-0cR2Lt/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-ZouCHA/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -675,7 +678,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-0cR2Lt/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-ZouCHA/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

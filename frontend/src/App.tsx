@@ -52,7 +52,6 @@ function App() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
-  // Swipe logic state & refs
   const touchStartY = useRef<number>(0);
   const modalBodyRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +87,7 @@ function App() {
   }, [query, apiBase, isLoading]);
 
   const handleSearch = async (targetQuery: string) => {
-    if (!targetQuery.trim()) return;
+    if (!targetQuery.trim()) return; // 빈 검색어는 무시
 
     setIsLoading(true);
     setError(null);
@@ -185,7 +184,6 @@ function App() {
     return millions.toLocaleString();
   };
 
-  // Touch handlers with scroll check
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
@@ -193,7 +191,6 @@ function App() {
   const handleTouchEnd = (e: React.TouchEvent) => {
     const touchEndY = e.changedTouches[0].clientY;
     const deltaY = touchEndY - touchStartY.current;
-    
     const isAtTop = modalBodyRef.current ? modalBodyRef.current.scrollTop === 0 : true;
 
     if (isAtTop && deltaY > 150) {
@@ -259,7 +256,7 @@ function App() {
             <div className="sub-search">
               <input
                 type="text"
-                placeholder="결과 내 검색..."
+                placeholder="결과 내 ETF 검색..."
                 value={filterQuery}
                 onChange={(e) => {
                   setFilterQuery(e.target.value);
@@ -357,7 +354,7 @@ function App() {
             
             <div className="modern-modal-header">
               <h3>{selectedETF.etf_name}</h3>
-              <p>상세 구성 종목 리스트 ({holdings.length}개)</p>
+              <p>상세 구성 종목 리스트 ({holdings.length}개 종목)</p>
             </div>
 
             <div className="modern-modal-body" ref={modalBodyRef}>

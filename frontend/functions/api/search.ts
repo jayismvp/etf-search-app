@@ -7,7 +7,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const url = new URL(request.url);
   const query = url.searchParams.get('query');
 
-  if (!query) {
+  if (!query || query.trim() === "") {
     return new Response(JSON.stringify([]), {
       headers: { "Content-Type": "application/json" }
     });
@@ -16,7 +16,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const lowerQuery = query.toLowerCase();
 
   try {
-    // D1에서 종목 검색. Like 검색 활용.
+    // 종목명, 종목티커, ETF 이름에서 검색
     const { results } = await env.DB.prepare(`
       SELECT 
         stock_name, 
@@ -28,8 +28,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         fee, 
         weight 
       FROM stocks 
-      WHERE lower(stock_name) LIKE ? OR lower(stock_ticker) LIKE ?
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
+      WHERE lower(stock_name) LIKE ? 
+         OR lower(stock_ticker) LIKE ? 
+         OR lower(etf_name) LIKE ?
+      ORDER BY nav DESC
+    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`, `%${lowerQuery}%`).all();
 
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }

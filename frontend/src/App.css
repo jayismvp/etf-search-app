@@ -468,19 +468,43 @@ body {
   margin-top: 60px;
   padding-bottom: 40px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   position: relative;
-  z-index: 1; /* 드롭다운보다 낮게 설정 */
+  z-index: 1;
+}
+
+.load-all-btn {
+  background: white;
+  border: 1px solid #eee;
+  padding: 12px 28px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.load-all-btn:hover {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .footer-card {
-  background: rgba(255, 255, 255, 0.5); /* 투명도 있는 흰색 */
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(5px);
   padding: 16px 32px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
   max-width: fit-content;
+  text-align: center;
 }
 
 .landing-footer p {
