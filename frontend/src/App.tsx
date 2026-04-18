@@ -36,6 +36,7 @@ function App() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAllView, setIsAllView] = useState(false); // 전체보기 모드 상태 추가
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -93,6 +94,9 @@ function App() {
     setFilterQuery('');
     setShowSuggestions(false);
     setSuggestions([]);
+    
+    // 검색어가 비어있으면 전체보기 모드 활성화
+    setIsAllView(targetQuery.trim() === '');
 
     try {
       const response = await fetch(`${apiBase}/search?query=${encodeURIComponent(targetQuery)}`);
@@ -117,6 +121,7 @@ function App() {
     setSortOrder('desc');
     setShowSuggestions(false);
     setSuggestions([]);
+    setIsAllView(false);
   };
 
   const handleETFClick = async (item: SearchResult) => {
@@ -277,9 +282,12 @@ function App() {
                     <th onClick={() => toggleSort('etf_name')} className="sortable">
                       ETF 이름 <SortIcon field="etf_name" />
                     </th>
-                    <th onClick={() => toggleSort('weight')} className="sortable">
-                      비중 <SortIcon field="weight" />
-                    </th>
+                    {/* 전체보기 모드가 아닐 때만 비중 헤더 표시 */}
+                    {!isAllView && (
+                      <th onClick={() => toggleSort('weight')} className="sortable">
+                        비중 <SortIcon field="weight" />
+                      </th>
+                    )}
                     <th onClick={() => toggleSort('fee')} className="sortable">
                       수수료 <SortIcon field="fee" />
                     </th>
@@ -297,7 +305,8 @@ function App() {
                       <td className="etf-name-cell" onClick={() => handleETFClick(item)}>
                         {item.etf_name}
                       </td>
-                      <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>
+                      {/* 전체보기 모드가 아닐 때만 비중 데이터 셀 표시 */}
+                      {!isAllView && <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>}
                       <td className="fee-cell">{item.fee ? `${item.fee}%` : '-'}</td>
                       <td className="nav-cell">{formatNAV(item.nav)}</td>
                       <td className="hide-mobile">{item.listing_date || '-'}</td>
