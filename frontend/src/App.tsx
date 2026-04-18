@@ -52,7 +52,6 @@ function App() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
-  // Swipe logic state
   const touchStartY = useRef<number>(0);
 
   useEffect(() => {
@@ -184,14 +183,13 @@ function App() {
     return millions.toLocaleString();
   };
 
-  // Touch handlers for sliding down to close
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     const touchEndY = e.changedTouches[0].clientY;
-    if (touchEndY - touchStartY.current > 100) { // 100px 이상 아래로 쓸어내리면 닫기
+    if (touchEndY - touchStartY.current > 100) {
       setSelectedETF(null);
     }
   };
@@ -342,7 +340,7 @@ function App() {
             
             <div className="modern-modal-header">
               <h3>{selectedETF.etf_name}</h3>
-              <p>Top Holdings</p>
+              <p>상세 구성 종목 리스트</p>
             </div>
 
             <div className="modern-modal-body">
@@ -350,9 +348,15 @@ function App() {
                 <div className="modal-shimmer">로딩 중...</div>
               ) : (
                 <div className="holdings-minimal-list">
+                  <div className="holding-row header">
+                    <div className="holding-stock-name">종목명</div>
+                    <div className="holding-weight">비중</div>
+                  </div>
                   {holdings.map((h, i) => (
                     <div className="holding-row" key={i}>
-                      <div className="holding-stock-name">{h.stock_name}</div>
+                      <div className="holding-stock-name">
+                        {h.stock_name} <span className="ticker-mini">({h.stock_ticker})</span>
+                      </div>
                       <div className="holding-weight">{h.weight}%</div>
                     </div>
                   ))}
