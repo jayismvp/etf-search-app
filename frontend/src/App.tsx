@@ -77,7 +77,6 @@ function App() {
           const res = await fetch(`${apiBase}/suggestions?query=${encodeURIComponent(query)}`);
           const data = await res.json();
           setSuggestions(data);
-          // 검색 결과가 있는 상태에서만 드롭다운 표시
           if (data.length > 0) setShowSuggestions(true);
         } catch (err) {
           console.error("Failed to fetch suggestions", err);
@@ -98,7 +97,6 @@ function App() {
     setCurrentPage(1);
     setFilterQuery('');
     
-    // 검색 실행 시 즉시 드롭다운 제거
     setShowSuggestions(false);
     setSuggestions([]);
 
@@ -192,7 +190,7 @@ function App() {
 
   return (
     <div className={`container ${results.length > 0 ? 'has-results' : 'landing'}`}>
-      <button className="home-btn" onClick={handleHome} title="처음으로">🏠</button>
+      {/* 홈 버튼 제거됨 */}
       
       {results.length === 0 && (
         <header className="main-header">
@@ -203,7 +201,12 @@ function App() {
 
       <main>
         <div className={`search-section ${results.length > 0 ? 'sticky' : 'centered'}`}>
-          {results.length > 0 && <h2 className="mini-title">ETF Finder</h2>}
+          {/* mini-title 클릭 시 홈으로 이동하도록 수정 */}
+          {results.length > 0 && (
+            <h2 className="mini-title" onClick={handleHome} title="처음으로 돌아가기">
+              ETF Finder
+            </h2>
+          )}
           <div className="search-container" ref={suggestionRef}>
             <form onSubmit={(e) => { e.preventDefault(); handleSearch(query); }} className="search-form">
               <input
