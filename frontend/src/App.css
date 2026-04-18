@@ -141,12 +141,13 @@ body {
   top: 105%;
   left: 0;
   right: 0;
-  background: #fff;
+  background: #ffffff; /* 불투명한 흰색 배경 */
   border-radius: 20px;
-  box-shadow: var(--shadow-md);
-  z-index: 1000;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* 더 강한 그림자 */
+  z-index: 9000; /* 푸터보다 확실히 높은 레이어 */
   overflow: hidden;
   padding: 10px 0;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .suggestion-item {
