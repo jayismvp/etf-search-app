@@ -181,14 +181,14 @@ function App() {
       
       {results.length === 0 && (
         <header className="main-header">
-          <h1>ETF finder</h1>
+          <h1>ETF Finder</h1>
           <p className="hero-text">찾고 싶은 종목이 포함된 ETF를 바로 검색해 보세요.</p>
         </header>
       )}
 
       <main>
         <div className={`search-section ${results.length > 0 ? 'sticky' : 'centered'}`}>
-          {results.length > 0 && <h2 className="mini-title">ETF finder</h2>}
+          {results.length > 0 && <h2 className="mini-title">ETF Finder</h2>}
           <div className="search-container" ref={suggestionRef}>
             <form onSubmit={(e) => { e.preventDefault(); handleSearch(query); }} className="search-form">
               <input

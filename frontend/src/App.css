@@ -1,18 +1,18 @@
 :root {
-  --primary-color: #000000;
-  --secondary-color: #666666;
-  --bg-color: #ffffff;
-  --input-bg: #f5f5f7;
-  --accent-blue: #0071e3;
-  --border-radius: 12px;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --primary-color: #1d1d1f;
+  --secondary-color: #86868b;
+  --bg-gradient: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --accent-blue: #0066cc;
+  --border-radius: 16px;
+  --shadow-md: 0 10px 40px rgba(0, 0, 0, 0.06);
 }
 
 body {
-  background-color: var(--bg-color);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3eeff 100%);
+  background-attachment: fixed;
   color: var(--primary-color);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Pretendard", sans-serif;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -21,12 +21,11 @@ body {
 
 .container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 60px 24px;
   display: flex;
   flex-direction: column;
-  transition: all 0.5s ease-in-out;
 }
 
 .container.landing {
@@ -45,26 +44,33 @@ body {
   height: 40px;
   cursor: pointer;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Landing Page Styles */
 .main-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
 
 .main-header h1 {
-  font-size: 4rem;
+  font-size: 5rem;
   font-weight: 800;
-  letter-spacing: -2px;
-  margin-bottom: 10px;
+  letter-spacing: -4px;
+  margin: 0 0 40px 0;
+  line-height: 1.1;
+  color: #000;
 }
 
 .hero-text {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: var(--secondary-color);
   font-weight: 400;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
 }
 
 /* Search Section */
@@ -273,7 +279,63 @@ body {
   cursor: pointer;
 }
 
-.nav-btn:disabled {
-  border-color: #eee;
-  color: #ccc;
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 40px 16px;
+  }
+
+  .main-header h1 {
+    font-size: 2.8rem; /* 모바일에서 제목 크기 축소 */
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+
+  .hero-text {
+    font-size: 1.1rem;
+    padding: 0 10px;
+  }
+
+  .search-section.sticky {
+    flex-direction: column; /* 검색 결과 화면에서 제목과 검색창을 세로로 배치 */
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mini-title {
+    font-size: 1.2rem;
+  }
+
+  .search-form {
+    flex-direction: column; /* 검색창과 버튼을 세로로 배치 */
+  }
+
+  .main-btn {
+    padding: 12px;
+    width: 100%;
+  }
+
+  .primary-input {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+
+  /* 테이블 가로 스크롤 허용 */
+  .results-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .results-table {
+    min-width: 600px; /* 테이블이 너무 찌그러지지 않도록 최소 너비 설정 */
+  }
+
+  .modal-content {
+    padding: 24px 16px;
+    width: 95%;
+  }
+
+  .modal-content h2 {
+    font-size: 1.2rem;
+  }
 }
