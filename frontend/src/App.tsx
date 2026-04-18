@@ -52,7 +52,9 @@ function App() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
+  // Swipe logic state & refs
   const touchStartY = useRef<number>(0);
+  const modalBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -183,13 +185,19 @@ function App() {
     return millions.toLocaleString();
   };
 
+  // Touch handlers with scroll check
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     const touchEndY = e.changedTouches[0].clientY;
-    if (touchEndY - touchStartY.current > 100) {
+    const deltaY = touchEndY - touchStartY.current;
+    
+    // 리스트가 최상단에 있고, 아래로 150px 이상 썰어내렸을 때만 닫기
+    const isAtTop = modalBodyRef.current ? modalBodyRef.current.scrollTop === 0 : true;
+
+    if (isAtTop && deltaY > 150) {
       setSelectedETF(null);
     }
   };
@@ -328,7 +336,6 @@ function App() {
         </div>
       </main>
 
-      {/* 푸터 내용 및 날짜 업데이트 */}
       {results.length === 0 && (
         <footer className="landing-footer">
           <div className="footer-card">
@@ -354,7 +361,7 @@ function App() {
               <p>상세 구성 종목 리스트</p>
             </div>
 
-            <div className="modern-modal-body">
+            <div className="modern-modal-body" ref={modalBodyRef}>
               {isModalLoading ? (
                 <div className="modal-shimmer">로딩 중...</div>
               ) : (
