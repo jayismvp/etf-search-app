@@ -98,12 +98,13 @@ function App() {
 
     try {
       const response = await fetch(`${apiBase}/search?query=${encodeURIComponent(targetQuery)}`);
-      if (!response.ok) throw new Error('Search failed');
       const data = await response.json();
       setResults(data);
+      if (data.length === 0) {
+        setError("검색 결과가 없습니다.");
+      }
     } catch (err) {
-      setError('데이터를 불러오는 중 오류가 발생했습니다.');
-      console.error(err);
+      setError("데이터를 가져오는 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -112,118 +113,115 @@ function App() {
   const handleHome = () => {
     setQuery('');
     setResults([]);
-    setFilterQuery('');
-    setSuggestions([]);
-    setShowSuggestions(false);
-    setCurrentPage(1);
     setError(null);
+    setFilterQuery('');
   };
 
   const handleETFClick = async (etfName: string, etfTicker: string) => {
     setSelectedETF({ name: etfName, ticker: etfTicker });
     setIsModalLoading(true);
     setHoldings([]);
-
     try {
-      const response = await fetch(`${apiBase}/etf-holdings?ticker=${etfTicker}`);
-      const data = await response.json();
+      const res = await fetch(`${apiBase}/holdings?ticker=${encodeURIComponent(etfTicker)}`);
+      const data = await res.json();
       setHoldings(data);
     } catch (err) {
-      console.error("Failed to fetch ETF holdings", err);
+      console.error("Failed to fetch holdings", err);
     } finally {
       setIsModalLoading(false);
     }
   };
+
+  const filteredResults = useMemo(() => {
+    return results.filter(item => 
+      item.etf_name.toLowerCase().includes(filterQuery.toLowerCase()) ||
+      item.etf_ticker.toLowerCase().includes(filterQuery.toLowerCase())
+    );
+  }, [results, filterQuery]);
+
+  const sortedResults = useMemo(() => {
+    const sorted = [...filteredResults].sort((a, b) => {
+      let aVal: any = a[sortField];
+      let bVal: any = b[sortField];
+
+      if (sortField === 'weight' || sortField === 'nav' || sortField === 'fee') {
+        aVal = parseFloat(aVal) || 0;
+        bVal = parseFloat(bVal) || 0;
+      }
+
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [filteredResults, sortField, sortOrder]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortOrder('asc');
+      setSortOrder('desc');
     }
   };
 
-  const filteredResults = useMemo(() => {
-    let list = results;
-    if (filterQuery) {
-      list = list.filter(item => 
-        item.etf_name.toLowerCase().includes(filterQuery.toLowerCase())
-      );
-    }
-    return list;
-  }, [results, filterQuery]);
-
-  const sortedResults = useMemo(() => {
-    const list = [...filteredResults];
-    return list.sort((a, b) => {
-      let valA: any = a[sortField] || '';
-      let valB: any = b[sortField] || '';
-      if (sortField === 'nav' || sortField === 'fee' || sortField === 'weight') {
-        valA = parseFloat(valA) || 0;
-        valB = parseFloat(valB) || 0;
-      }
-      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [filteredResults, sortField, sortOrder]);
-
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedResults.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(sortedResults.length / itemsPerPage);
-  const currentItems = useMemo(() => {
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    return sortedResults.slice(indexOfFirstItem, indexOfLastItem);
-  }, [sortedResults, currentPage, itemsPerPage]);
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return <span className="sort-icon">↕</span>;
     return <span className="sort-icon active">{sortOrder === 'asc' ? '↑' : '↓'}</span>;
   };
 
-  const commonInfo = holdings.length > 0 ? holdings[0] : null;
-
   return (
-    <div className="container">
+    <div className={`container ${results.length > 0 ? 'has-results' : 'landing'}`}>
       <button className="home-btn" onClick={handleHome} title="처음으로">🏠</button>
-      <header>
-        <h1><span className="icon">🐂</span> ETF Search App <span className="icon">🐻</span></h1>
-        <p>어떤 ETF가 이 종목을 담고 있을까요?</p>
-      </header>
+      
+      {results.length === 0 && (
+        <header className="main-header">
+          <h1>ETF finder</h1>
+          <p className="hero-text">찾고 싶은 종목이 포함된 ETF를 바로 검색해 보세요.</p>
+        </header>
+      )}
 
       <main>
-        <div className="search-container" ref={suggestionRef}>
-          <form onSubmit={(e) => { e.preventDefault(); handleSearch(query); }} className="search-form">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="주식명 또는 티커 입력 (예: 삼성전자, 005930)"
-              className="search-input primary-input"
-              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-            />
-            <button type="submit" className="search-button main-btn" disabled={isLoading}>
-              {isLoading ? '찾는 중...' : '검색'}
-            </button>
-          </form>
+        <div className={`search-section ${results.length > 0 ? 'sticky' : 'centered'}`}>
+          {results.length > 0 && <h2 className="mini-title">ETF finder</h2>}
+          <div className="search-container" ref={suggestionRef}>
+            <form onSubmit={(e) => { e.preventDefault(); handleSearch(query); }} className="search-form">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="주식명 또는 티커 입력 (예: 삼성전자, 005930)"
+                className="search-input primary-input"
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              />
+              <button type="submit" className="search-button main-btn" disabled={isLoading}>
+                {isLoading ? '찾는 중...' : '검색'}
+              </button>
+            </form>
 
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="suggestions-list">
-              {suggestions.map((s, idx) => (
-                <div 
-                  key={idx} 
-                  className="suggestion-item"
-                  onClick={() => {
-                    setQuery(s.name);
-                    handleSearch(s.name);
-                  }}
-                >
-                  <span className="s-name">{s.name}</span>
-                  <span className="s-ticker">{s.ticker}</span>
-                </div>
-              ))}
-            </div>
-          )}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="suggestions-list">
+                {suggestions.map((s, idx) => (
+                  <div 
+                    key={idx} 
+                    className="suggestion-item"
+                    onClick={() => {
+                      setQuery(s.name);
+                      handleSearch(s.name);
+                    }}
+                  >
+                    <span className="s-name">{s.name}</span>
+                    <span className="s-ticker">{s.ticker}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {results.length > 0 && (
@@ -291,14 +289,14 @@ function App() {
                 <tbody>
                   {currentItems.map((item, index) => (
                     <tr key={index}>
-                      <td className="etf-name-cell link-style" onClick={() => handleETFClick(item.etf_name, item.etf_ticker)}>
+                      <td className="etf-name-cell" onClick={() => handleETFClick(item.etf_name, item.etf_ticker)}>
                         {item.etf_name}
                       </td>
                       <td><span className="ticker-badge">{item.etf_ticker}</span></td>
                       <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>
                       <td>{item.listing_date || '-'}</td>
                       <td>{item.fee ? `${item.fee}%` : '-'}</td>
-                      <td className="nav-cell">{item.nav ? Math.round(Number(item.nav) / 1000000).toLocaleString() : '-'}</td>
+                      <td className="nav-cell">{item.nav ? parseInt(item.nav).toLocaleString() : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -306,18 +304,16 @@ function App() {
 
               <div className="pagination-nav">
                 <button 
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1} 
+                  onClick={() => setCurrentPage(prev => prev - 1)}
                   className="nav-btn"
                 >
                   이전
                 </button>
-                <span className="page-info">
-                  {currentPage} / {totalPages || 1}
-                </span>
+                <span className="page-info">{currentPage} / {totalPages}</span>
                 <button 
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages || totalPages === 0}
+                  disabled={currentPage === totalPages} 
+                  onClick={() => setCurrentPage(prev => prev + 1)}
                   className="nav-btn"
                 >
                   다음
@@ -325,29 +321,19 @@ function App() {
               </div>
             </>
           ) : (
-            !isLoading && query && <p className="no-results">검색 결과가 없어요 😢</p>
+            results.length > 0 && <div className="no-results">검색 결과가 없습니다.</div>
           )}
         </div>
       </main>
 
-      {/* ETF Detail Modal */}
       {selectedETF && (
         <div className="modal-overlay" onClick={() => setSelectedETF(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setSelectedETF(null)}>&times;</button>
             <div className="modal-header">
               <div className="modal-title-group">
                 <h2>{selectedETF.name} <small>({selectedETF.ticker})</small></h2>
-                {commonInfo && (
-                  <div className="common-info-badges">
-                    <span className="info-badge">수수료: {commonInfo.fee}%</span>
-                    <span className="info-badge">과세: {commonInfo.taxation}</span>
-                    <span className={`info-badge ${Number(commonInfo.premium_discount) > 0 ? 'pos-bg' : 'neg-bg'}`}>
-                      괴리율: {commonInfo.premium_discount}%
-                    </span>
-                  </div>
-                )}
               </div>
-              <button className="close-btn" onClick={() => setSelectedETF(null)}>×</button>
             </div>
             <div className="modal-body">
               {isModalLoading ? (
@@ -357,21 +343,21 @@ function App() {
                   <table className="holdings-table">
                     <thead>
                       <tr>
-                        <th>주식</th>
+                        <th>종목명</th>
                         <th>티커</th>
-                        <th>계약수</th>
-                        <th>계약금액</th>
-                        <th>비중 (%)</th>
+                        <th>비중</th>
+                        <th>금액</th>
+                        <th>과세구분</th>
                       </tr>
                     </thead>
                     <tbody>
                       {holdings.map((h, i) => (
                         <tr key={i}>
-                          <td className="stock-name-cell">{h.stock_name || 'N/A'}</td>
-                          <td><span className="ticker-badge small">{h.stock_ticker || 'N/A'}</span></td>
-                          <td>{Number(h.contract).toLocaleString()}</td>
-                          <td>{Number(h.amount).toLocaleString()}</td>
+                          <td className="stock-name-cell">{h.stock_name}</td>
+                          <td><span className="ticker-badge small">{h.stock_ticker}</span></td>
                           <td className="weight-cell">{h.weight}%</td>
+                          <td>{h.amount ? parseInt(h.amount).toLocaleString() : '-'}</td>
+                          <td className="tax-cell">{h.taxation || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -383,7 +369,7 @@ function App() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
