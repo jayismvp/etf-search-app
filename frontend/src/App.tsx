@@ -50,7 +50,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   // ETF Detail Modal states
-  const [selectedETF, setSelectedETF] = useState<{ name: string; ticker: string } | null>(null);
+  const [selectedETF, setSelectedETF] = useState<SearchResult | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
@@ -117,12 +117,12 @@ function App() {
     setFilterQuery('');
   };
 
-  const handleETFClick = async (etfName: string, etfTicker: string) => {
-    setSelectedETF({ name: etfName, ticker: etfTicker });
+  const handleETFClick = async (item: SearchResult) => {
+    setSelectedETF(item);
     setIsModalLoading(true);
     setHoldings([]);
     try {
-      const res = await fetch(`${apiBase}/holdings?ticker=${encodeURIComponent(etfTicker)}`);
+      const res = await fetch(`${apiBase}/holdings?ticker=${encodeURIComponent(item.etf_ticker)}`);
       const data = await res.json();
       setHoldings(data);
     } catch (err) {
@@ -267,36 +267,39 @@ function App() {
                 <thead>
                   <tr>
                     <th onClick={() => toggleSort('etf_name')} className="sortable">
-                      ETF 이름 <SortIcon field="etf_name" />
+                      ETF 정보 <SortIcon field="etf_name" />
                     </th>
-                    <th onClick={() => toggleSort('etf_ticker')} className="sortable">
-                      ETF 티커 <SortIcon field="etf_ticker" />
+                    <th onClick={() => toggleSort('etf_ticker')} className="sortable hide-mobile">
+                      티커 <SortIcon field="etf_ticker" />
                     </th>
                     <th onClick={() => toggleSort('weight')} className="sortable">
-                      해당주식 비중 <SortIcon field="weight" />
+                      비중 <SortIcon field="weight" />
                     </th>
-                    <th onClick={() => toggleSort('listing_date')} className="sortable">
+                    <th onClick={() => toggleSort('listing_date')} className="sortable hide-mobile">
                       상장일 <SortIcon field="listing_date" />
                     </th>
-                    <th onClick={() => toggleSort('fee')} className="sortable">
-                      총수수료 <SortIcon field="fee" />
+                    <th onClick={() => toggleSort('fee')} className="sortable hide-mobile">
+                      수수료 <SortIcon field="fee" />
                     </th>
-                    <th onClick={() => toggleSort('nav')} className="sortable">
-                      NAV(백만) <SortIcon field="nav" />
+                    <th onClick={() => toggleSort('nav')} className="sortable hide-mobile">
+                      NAV <SortIcon field="nav" />
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentItems.map((item, index) => (
                     <tr key={index}>
-                      <td className="etf-name-cell" onClick={() => handleETFClick(item.etf_name, item.etf_ticker)}>
-                        {item.etf_name}
+                      <td className="etf-name-cell" onClick={() => handleETFClick(item)}>
+                        <div className="name-wrapper">
+                          <span className="name-text">{item.etf_name}</span>
+                          <span className="ticker-text show-mobile">{item.etf_ticker}</span>
+                        </div>
                       </td>
-                      <td><span className="ticker-badge">{item.etf_ticker}</span></td>
+                      <td className="hide-mobile"><span className="ticker-badge">{item.etf_ticker}</span></td>
                       <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>
-                      <td>{item.listing_date || '-'}</td>
-                      <td>{item.fee ? `${item.fee}%` : '-'}</td>
-                      <td className="nav-cell">{item.nav ? parseInt(item.nav).toLocaleString() : '-'}</td>
+                      <td className="hide-mobile">{item.listing_date || '-'}</td>
+                      <td className="hide-mobile">{item.fee ? `${item.fee}%` : '-'}</td>
+                      <td className="nav-cell hide-mobile">{item.nav ? parseInt(item.nav).toLocaleString() : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -332,7 +335,12 @@ function App() {
             <button className="close-btn" onClick={() => setSelectedETF(null)}>&times;</button>
             <div className="modal-header">
               <div className="modal-title-group">
-                <h2>{selectedETF.name} <small>({selectedETF.ticker})</small></h2>
+                <h2>{selectedETF.etf_name} <small>({selectedETF.etf_ticker})</small></h2>
+                <div className="etf-meta-info">
+                  <span>상장일: {selectedETF.listing_date || '-'}</span>
+                  <span>총수수료: {selectedETF.fee}%</span>
+                  <span>NAV: {selectedETF.nav ? parseInt(selectedETF.nav).toLocaleString() : '-'}M</span>
+                </div>
               </div>
             </div>
             <div className="modal-body">
