@@ -328,6 +328,17 @@ function App() {
         </div>
       </main>
 
+      {/* 푸터 내용 및 날짜 업데이트 */}
+      {results.length === 0 && (
+        <footer className="landing-footer">
+          <div className="footer-card">
+            <p>기준일자: 2026-04-17</p>
+            <p>Pool: 국내 주식형 ETF 378종</p>
+            <p>업데이트 예정일: 매월 말</p>
+          </div>
+        </footer>
+      )}
+
       {selectedETF && (
         <div className="modern-modal-overlay" onClick={() => setSelectedETF(null)}>
           <div 
