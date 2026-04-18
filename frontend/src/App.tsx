@@ -37,12 +37,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Suggestions state
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestionRef = useRef<HTMLDivElement>(null);
 
-  // Pagination, Filtering, Sorting states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [filterQuery, setFilterQuery] = useState('');
@@ -50,7 +48,6 @@ function App() {
   const [sortField, setSortField] = useState<SortField>('nav');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  // ETF Detail Modal states
   const [selectedETF, setSelectedETF] = useState<SearchResult | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
@@ -319,27 +316,22 @@ function App() {
       </main>
 
       {selectedETF && (
-        <div className="modal-overlay" onClick={() => setSelectedETF(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-top-bar">
-              <div className="modal-etf-title">{selectedETF.etf_name}</div>
-              <button className="modal-close-icon" onClick={() => setSelectedETF(null)}>&times;</button>
+        <div className="etf-modal-overlay" onClick={() => setSelectedETF(null)}>
+          <div className="etf-modal-window" onClick={(e) => e.stopPropagation()}>
+            <div className="etf-modal-header">
+              <div className="etf-modal-title">
+                <h2>{selectedETF.etf_name}</h2>
+                <p>구성 종목 {holdings.length}개</p>
+              </div>
+              <button className="etf-modal-close" onClick={() => setSelectedETF(null)}>&times;</button>
             </div>
             
-            <div className="modal-body-new">
-              <div className="holdings-header">
-                <span className="holdings-title">구성 종목</span>
-                <span className="holdings-count">{holdings.length}개 종목</span>
-              </div>
-              
+            <div className="etf-modal-body">
               {isModalLoading ? (
-                <div className="modal-loading-new">
-                  <div className="spinner"></div>
-                  <p>데이터 로딩 중...</p>
-                </div>
+                <div className="etf-modal-loader">데이터 로딩 중...</div>
               ) : (
-                <div className="holdings-list-new">
-                  <table className="holdings-table-new">
+                <div className="etf-holdings-container">
+                  <table className="etf-holdings-table">
                     <thead>
                       <tr>
                         <th>종목명</th>
@@ -349,10 +341,8 @@ function App() {
                     <tbody>
                       {holdings.map((h, i) => (
                         <tr key={i}>
-                          <td className="stock-name">
-                            {h.stock_name}
-                          </td>
-                          <td className="weight-highlight">{h.weight}%</td>
+                          <td className="holdings-stock-name">{h.stock_name}</td>
+                          <td className="holdings-weight">{h.weight}%</td>
                         </tr>
                       ))}
                     </tbody>
