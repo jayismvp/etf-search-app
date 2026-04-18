@@ -36,7 +36,7 @@ function App() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isAllView, setIsAllView] = useState(false); // 전체보기 모드 상태 추가
+  const [isAllView, setIsAllView] = useState(false);
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -95,7 +95,6 @@ function App() {
     setShowSuggestions(false);
     setSuggestions([]);
     
-    // 검색어가 비어있으면 전체보기 모드 활성화
     setIsAllView(targetQuery.trim() === '');
 
     try {
@@ -282,7 +281,6 @@ function App() {
                     <th onClick={() => toggleSort('etf_name')} className="sortable">
                       ETF 이름 <SortIcon field="etf_name" />
                     </th>
-                    {/* 전체보기 모드가 아닐 때만 비중 헤더 표시 */}
                     {!isAllView && (
                       <th onClick={() => toggleSort('weight')} className="sortable">
                         비중 <SortIcon field="weight" />
@@ -305,7 +303,6 @@ function App() {
                       <td className="etf-name-cell" onClick={() => handleETFClick(item)}>
                         {item.etf_name}
                       </td>
-                      {/* 전체보기 모드가 아닐 때만 비중 데이터 셀 표시 */}
                       {!isAllView && <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>}
                       <td className="fee-cell">{item.fee ? `${item.fee}%` : '-'}</td>
                       <td className="nav-cell">{formatNAV(item.nav)}</td>
@@ -365,6 +362,19 @@ function App() {
             <div className="modern-modal-header">
               <h3>{selectedETF.etf_name}</h3>
               <p>상세 구성 종목 리스트 ({holdings.length}개 종목)</p>
+              <a 
+                href={`https://finance.naver.com/item/main.naver?code=${selectedETF.etf_ticker}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="naver-finance-link"
+              >
+                네이버 증권에서 자세히 보기
+                <svg className="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
             </div>
 
             <div className="modern-modal-body" ref={modalBodyRef}>

@@ -314,7 +314,35 @@ body {
 .modern-modal-header p {
   font-size: 0.85rem;
   color: #86868b;
-  margin: 0;
+  margin: 0 0 10px; /* 아래 링크와 간격 확보 */
+}
+
+.naver-finance-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem; /* 상단 p 태그와 동일한 크기 */
+  color: #0071e3;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.naver-finance-link:hover {
+  color: #005bb7;
+  text-decoration: underline;
+}
+
+.external-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+  transition: transform 0.2s;
+}
+
+.naver-finance-link:hover .external-icon {
+  transform: translate(2px, -2px); /* 외부 링크 느낌의 화살표 이동 효과 */
 }
 
 .modern-modal-body {
