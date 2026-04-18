@@ -7,16 +7,32 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const url = new URL(request.url);
   const query = url.searchParams.get('query');
 
-  if (!query || query.trim() === "") {
-    return new Response(JSON.stringify([]), {
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  const lowerQuery = query.toLowerCase();
-
   try {
-    // 종목명, 종목티커, ETF 이름에서 검색
+    // 1. 검색어가 없거나 빈 경우: 전체 ETF 목록 반환 (유니크한 ETF 378종)
+    if (!query || query.trim() === "") {
+      const { results } = await env.DB.prepare(`
+        SELECT 
+          MAX(stock_name) as stock_name, 
+          MAX(stock_ticker) as stock_ticker, 
+          etf_name, 
+          etf_ticker, 
+          listing_date, 
+          NAV as nav, 
+          fee, 
+          MAX(weight) as weight 
+        FROM stocks 
+        GROUP BY etf_ticker
+        ORDER BY nav DESC
+      `).all();
+
+      return new Response(JSON.stringify(results), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const lowerQuery = query.toLowerCase();
+
+    // 2. 검색어가 있는 경우: 오직 '주식 종목명'과 '종목 티커'에서만 검색 (ETF 이름 제외)
     const { results } = await env.DB.prepare(`
       SELECT 
         stock_name, 
@@ -29,10 +45,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         weight 
       FROM stocks 
       WHERE lower(stock_name) LIKE ? 
-         OR lower(stock_ticker) LIKE ? 
-         OR lower(etf_name) LIKE ?
+         OR lower(stock_ticker) LIKE ?
       ORDER BY nav DESC
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`, `%${lowerQuery}%`).all();
+    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
 
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }

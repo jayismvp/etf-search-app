@@ -92,13 +92,27 @@ var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const query = url.searchParams.get("query");
-  if (!query || query.trim() === "") {
-    return new Response(JSON.stringify([]), {
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-  const lowerQuery = query.toLowerCase();
   try {
+    if (!query || query.trim() === "") {
+      const { results: results2 } = await env.DB.prepare(`
+        SELECT 
+          MAX(stock_name) as stock_name, 
+          MAX(stock_ticker) as stock_ticker, 
+          etf_name, 
+          etf_ticker, 
+          listing_date, 
+          NAV as nav, 
+          fee, 
+          MAX(weight) as weight 
+        FROM stocks 
+        GROUP BY etf_ticker
+        ORDER BY nav DESC
+      `).all();
+      return new Response(JSON.stringify(results2), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    const lowerQuery = query.toLowerCase();
     const { results } = await env.DB.prepare(`
       SELECT 
         stock_name, 
@@ -111,10 +125,9 @@ var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
         weight 
       FROM stocks 
       WHERE lower(stock_name) LIKE ? 
-         OR lower(stock_ticker) LIKE ? 
-         OR lower(etf_name) LIKE ?
+         OR lower(stock_ticker) LIKE ?
       ORDER BY nav DESC
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`, `%${lowerQuery}%`).all();
+    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }
     });

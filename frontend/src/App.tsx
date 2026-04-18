@@ -87,8 +87,6 @@ function App() {
   }, [query, apiBase, isLoading]);
 
   const handleSearch = async (targetQuery: string) => {
-    if (!targetQuery.trim()) return; // 빈 검색어는 무시
-
     setIsLoading(true);
     setError(null);
     setCurrentPage(1);
@@ -334,6 +332,9 @@ function App() {
 
       {results.length === 0 && (
         <footer className="landing-footer">
+          <button className="load-all-btn" onClick={() => handleSearch('')}>
+            전체 ETF 목록 불러오기
+          </button>
           <div className="footer-card">
             <p>기준일자: 2026-04-17</p>
             <p>Pool: 국내 주식형 ETF 378종</p>
