@@ -228,7 +228,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .modal-content {
@@ -279,6 +279,11 @@ body {
   cursor: pointer;
 }
 
+.nav-btn:disabled {
+  border-color: #eee;
+  color: #ccc;
+}
+
 /* Desktop-only columns */
 .hide-mobile {
   display: table-cell;
@@ -314,85 +319,119 @@ body {
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+  .container {
+    padding: 20px 12px;
+  }
+
+  .main-header {
+    margin-bottom: 30px;
+  }
+
+  .main-header h1 {
+    font-size: 2.2rem;
+    letter-spacing: -1.5px;
+    margin-bottom: 15px;
+  }
+
+  .hero-text {
+    font-size: 0.95rem;
+  }
+
+  .search-section.sticky {
+    margin-bottom: 20px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mini-title {
+    font-size: 1rem;
+  }
+
+  .primary-input {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .main-btn {
+    padding: 0 12px;
+    font-size: 0.85rem;
+  }
+
   .hide-mobile {
     display: none !important;
   }
 
   .show-mobile {
-    display: inline-block !important;
+    display: block !important;
   }
 
-  .container {
-    padding: 40px 16px;
+  .results-section {
+    width: 100%;
+    overflow-x: hidden;
   }
 
-  .main-header h1 {
-    font-size: 2.8rem;
-    letter-spacing: -2px;
-    margin-bottom: 20px;
+  .results-table {
+    table-layout: fixed;
+    width: 100%;
   }
 
-  .results-table td, .results-table th {
-    padding: 12px 8px;
+  .results-table th, .results-table td {
+    padding: 8px 4px;
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .results-table td:first-child {
-    min-width: 120px; /* 이름 컬럼이 너무 작아지지 않게 */
-    white-space: normal; /* 줄바꿈 허용 */
-    word-break: keep-all;
-    overflow-wrap: break-word;
+  /* 모바일 컬럼 너비 비율 고정 */
+  .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 45%; } /* 이름 */
+  .results-table th:nth-child(3), .results-table td:nth-child(3) { width: 15%; } /* 비중 */
+  .results-table th:nth-child(4), .results-table td:nth-child(4) { width: 15%; } /* 수수료 */
+  .results-table th:nth-child(5), .results-table td:nth-child(5) { width: 25%; } /* NAV */
+
+  .name-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ticker-text {
+    font-size: 0.65rem;
+  }
+
+  .pagination-nav {
+    margin-top: 20px;
+    gap: 10px;
+  }
+
+  .modal-content {
+    padding: 20px 15px;
+    width: 95%;
+  }
+
+  .modal-header h2 {
+    font-size: 1rem;
   }
 
   .etf-meta-info {
     flex-direction: column;
-    gap: 5px;
+    font-size: 0.7rem;
+    gap: 4px;
   }
 
-  .hero-text {
-    font-size: 1.1rem;
-    padding: 0 10px;
+  .holdings-table th, .holdings-table td {
+    padding: 8px 4px;
+    font-size: 0.7rem;
   }
 
-  .search-section.sticky {
-    flex-direction: column; /* 검색 결과 화면에서 제목과 검색창을 세로로 배치 */
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .mini-title {
-    font-size: 1.2rem;
-  }
-
-  .search-form {
-    flex-direction: column; /* 검색창과 버튼을 세로로 배치 */
-  }
-
-  .main-btn {
-    padding: 12px;
-    width: 100%;
-  }
-
-  .primary-input {
-    padding: 14px 20px;
-    font-size: 1rem;
-  }
-
-  /* 테이블 가로 스크롤 허용 */
-  .results-section {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .results-table {
-    min-width: 600px; /* 테이블이 너무 찌그러지지 않도록 최소 너비 설정 */
-  }
-
-  .modal-content {
-    padding: 24px 16px;
-    width: 95%;
-  }
-
-  .modal-content h2 {
-    font-size: 1.2rem;
+  .small-ticker {
+    font-size: 0.6rem;
+    color: #888;
+    background: #f0f0f0;
+    display: inline-block;
+    padding: 0 4px;
+    border-radius: 3px;
   }
 }

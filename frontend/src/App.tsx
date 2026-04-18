@@ -46,8 +46,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterQuery, setFilterQuery] = useState('');
-  const [sortField, setSortField] = useState<SortField>('etf_name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  
+  // 초기 정렬을 NAV 내림차순으로 설정
+  const [sortField, setSortField] = useState<SortField>('nav');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // ETF Detail Modal states
   const [selectedETF, setSelectedETF] = useState<SearchResult | null>(null);
@@ -69,13 +71,14 @@ function App() {
 
   // Fetch suggestions
   useEffect(() => {
-    if (query.trim().length > 0) {
+    if (query.trim().length > 0 && !isLoading) {
       const delayDebounce = setTimeout(async () => {
         try {
           const res = await fetch(`${apiBase}/suggestions?query=${encodeURIComponent(query)}`);
           const data = await res.json();
           setSuggestions(data);
-          setShowSuggestions(true);
+          // 검색 결과가 이미 나온 상태에서 타이핑할 때만 보여줌
+          if (data.length > 0) setShowSuggestions(true);
         } catch (err) {
           console.error("Failed to fetch suggestions", err);
         }
@@ -85,7 +88,7 @@ function App() {
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [query, apiBase]);
+  }, [query, apiBase, isLoading]);
 
   const handleSearch = async (targetQuery: string) => {
     if (!targetQuery.trim()) return;
@@ -94,7 +97,7 @@ function App() {
     setError(null);
     setCurrentPage(1);
     setFilterQuery('');
-    setShowSuggestions(false);
+    setShowSuggestions(false); // 검색 시작 시 드롭다운 닫기
 
     try {
       const response = await fetch(`${apiBase}/search?query=${encodeURIComponent(targetQuery)}`);
@@ -115,6 +118,8 @@ function App() {
     setResults([]);
     setError(null);
     setFilterQuery('');
+    setSortField('nav');
+    setSortOrder('desc');
   };
 
   const handleETFClick = async (item: SearchResult) => {
@@ -175,6 +180,12 @@ function App() {
     return <span className="sort-icon active">{sortOrder === 'asc' ? '↑' : '↓'}</span>;
   };
 
+  const formatNAV = (nav: string | undefined) => {
+    if (!nav) return '-';
+    const millions = Math.round(parseFloat(nav) / 1000000);
+    return millions.toLocaleString();
+  };
+
   return (
     <div className={`container ${results.length > 0 ? 'has-results' : 'landing'}`}>
       <button className="home-btn" onClick={handleHome} title="처음으로">🏠</button>
@@ -195,12 +206,12 @@ function App() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="주식명 또는 티커 입력 (예: 삼성전자, 005930)"
+                placeholder="주식명 또는 티커 입력"
                 className="search-input primary-input"
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               />
               <button type="submit" className="search-button main-btn" disabled={isLoading}>
-                {isLoading ? '찾는 중...' : '검색'}
+                {isLoading ? '...' : '검색'}
               </button>
             </form>
 
@@ -212,6 +223,7 @@ function App() {
                     className="suggestion-item"
                     onClick={() => {
                       setQuery(s.name);
+                      setShowSuggestions(false); // 선택 시 닫기
                       handleSearch(s.name);
                     }}
                   >
@@ -229,7 +241,7 @@ function App() {
             <div className="sub-search">
               <input
                 type="text"
-                placeholder="결과 내 ETF 이름 검색..."
+                placeholder="결과 내 검색..."
                 value={filterQuery}
                 onChange={(e) => {
                   setFilterQuery(e.target.value);
@@ -239,8 +251,8 @@ function App() {
               />
             </div>
             
-            <div className="pagination-controls">
-              <span>한 페이지 표시:</span>
+            <div className="pagination-controls hide-mobile">
+              <span>표시:</span>
               <select 
                 value={itemsPerPage} 
                 onChange={(e) => {
@@ -249,10 +261,9 @@ function App() {
                 }}
                 className="page-select"
               >
-                <option value={10}>10개</option>
-                <option value={20}>20개</option>
-                <option value={50}>50개</option>
-                <option value={100}>100개</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
               </select>
             </div>
           </div>
@@ -275,14 +286,14 @@ function App() {
                     <th onClick={() => toggleSort('weight')} className="sortable">
                       비중 <SortIcon field="weight" />
                     </th>
-                    <th onClick={() => toggleSort('listing_date')} className="sortable hide-mobile">
-                      상장일 <SortIcon field="listing_date" />
-                    </th>
-                    <th onClick={() => toggleSort('fee')} className="sortable hide-mobile">
+                    <th onClick={() => toggleSort('fee')} className="sortable">
                       수수료 <SortIcon field="fee" />
                     </th>
-                    <th onClick={() => toggleSort('nav')} className="sortable hide-mobile">
-                      NAV <SortIcon field="nav" />
+                    <th onClick={() => toggleSort('nav')} className="sortable">
+                      NAV(백만) <SortIcon field="nav" />
+                    </th>
+                    <th onClick={() => toggleSort('listing_date')} className="sortable hide-mobile">
+                      상장일 <SortIcon field="listing_date" />
                     </th>
                   </tr>
                 </thead>
@@ -297,9 +308,9 @@ function App() {
                       </td>
                       <td className="hide-mobile"><span className="ticker-badge">{item.etf_ticker}</span></td>
                       <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>
+                      <td className="fee-cell">{item.fee ? `${item.fee}%` : '-'}</td>
+                      <td className="nav-cell">{formatNAV(item.nav)}</td>
                       <td className="hide-mobile">{item.listing_date || '-'}</td>
-                      <td className="hide-mobile">{item.fee ? `${item.fee}%` : '-'}</td>
-                      <td className="nav-cell hide-mobile">{item.nav ? parseInt(item.nav).toLocaleString() : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -311,20 +322,20 @@ function App() {
                   onClick={() => setCurrentPage(prev => prev - 1)}
                   className="nav-btn"
                 >
-                  이전
+                  &lt;
                 </button>
-                <span className="page-info">{currentPage} / {totalPages}</span>
+                <span className="page-info">{currentPage}/{totalPages}</span>
                 <button 
                   disabled={currentPage === totalPages} 
                   onClick={() => setCurrentPage(prev => prev + 1)}
                   className="nav-btn"
                 >
-                  다음
+                  &gt;
                 </button>
               </div>
             </>
           ) : (
-            results.length > 0 && <div className="no-results">검색 결과가 없습니다.</div>
+            results.length > 0 && <div className="no-results">결과 없음</div>
           )}
         </div>
       </main>
@@ -335,37 +346,37 @@ function App() {
             <button className="close-btn" onClick={() => setSelectedETF(null)}>&times;</button>
             <div className="modal-header">
               <div className="modal-title-group">
-                <h2>{selectedETF.etf_name} <small>({selectedETF.etf_ticker})</small></h2>
+                <h2>{selectedETF.etf_name}</h2>
                 <div className="etf-meta-info">
+                  <span>티커: {selectedETF.etf_ticker}</span>
                   <span>상장일: {selectedETF.listing_date || '-'}</span>
-                  <span>총수수료: {selectedETF.fee}%</span>
-                  <span>NAV: {selectedETF.nav ? parseInt(selectedETF.nav).toLocaleString() : '-'}M</span>
+                  <span>수수료: {selectedETF.fee}%</span>
+                  <span>NAV: {formatNAV(selectedETF.nav)}백만</span>
                 </div>
               </div>
             </div>
             <div className="modal-body">
               {isModalLoading ? (
-                <div className="modal-loading">구성 종목을 불러오는 중...</div>
+                <div className="modal-loading">로딩 중...</div>
               ) : (
                 <div className="holdings-table-container">
                   <table className="holdings-table">
                     <thead>
                       <tr>
                         <th>종목명</th>
-                        <th>티커</th>
                         <th>비중</th>
-                        <th>금액</th>
-                        <th>과세구분</th>
+                        <th className="hide-mobile">금액</th>
                       </tr>
                     </thead>
                     <tbody>
                       {holdings.map((h, i) => (
                         <tr key={i}>
-                          <td className="stock-name-cell">{h.stock_name}</td>
-                          <td><span className="ticker-badge small">{h.stock_ticker}</span></td>
+                          <td className="stock-name-cell">
+                            {h.stock_name}
+                            <div className="show-mobile small-ticker">{h.stock_ticker}</div>
+                          </td>
                           <td className="weight-cell">{h.weight}%</td>
-                          <td>{h.amount ? parseInt(h.amount).toLocaleString() : '-'}</td>
-                          <td className="tax-cell">{h.taxation || '-'}</td>
+                          <td className="hide-mobile">{h.amount ? parseInt(h.amount).toLocaleString() : '-'}</td>
                         </tr>
                       ))}
                     </tbody>
