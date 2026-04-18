@@ -322,34 +322,20 @@ function App() {
         <div className="modal-overlay" onClick={() => setSelectedETF(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-top-bar">
+              <div className="modal-etf-title">{selectedETF.etf_name}</div>
               <button className="modal-close-icon" onClick={() => setSelectedETF(null)}>&times;</button>
             </div>
             
-            <div className="modal-header-new">
-              <div className="etf-badge">ETF DETAIL</div>
-              <h2>{selectedETF.etf_name}</h2>
-              <div className="etf-summary-cards">
-                <div className="summary-card">
-                  <span className="label">NAV(백만)</span>
-                  <span className="value">{formatNAV(selectedETF.nav)}</span>
-                </div>
-                <div className="summary-card">
-                  <span className="label">총수수료</span>
-                  <span className="value">{selectedETF.fee}%</span>
-                </div>
-                <div className="summary-card">
-                  <span className="label">상장일</span>
-                  <span className="value">{selectedETF.listing_date || '-'}</span>
-                </div>
-              </div>
-            </div>
-
             <div className="modal-body-new">
-              <h3 className="section-title">구성 종목 Top Holdings</h3>
+              <div className="holdings-header">
+                <span className="holdings-title">구성 종목</span>
+                <span className="holdings-count">{holdings.length}개 종목</span>
+              </div>
+              
               {isModalLoading ? (
                 <div className="modal-loading-new">
                   <div className="spinner"></div>
-                  <p>데이터를 불러오는 중입니다...</p>
+                  <p>데이터 로딩 중...</p>
                 </div>
               ) : (
                 <div className="holdings-list-new">
@@ -357,7 +343,6 @@ function App() {
                     <thead>
                       <tr>
                         <th>종목명</th>
-                        <th className="hide-mobile">티커</th>
                         <th>비중</th>
                         <th className="hide-mobile">금액(백만)</th>
                       </tr>
@@ -369,7 +354,6 @@ function App() {
                             {h.stock_name}
                             <span className="show-mobile stock-ticker-mini">{h.stock_ticker}</span>
                           </td>
-                          <td className="hide-mobile"><span className="ticker-badge-mini">{h.stock_ticker}</span></td>
                           <td className="weight-highlight">{h.weight}%</td>
                           <td className="hide-mobile">{h.amount ? (parseInt(h.amount)/1000000).toFixed(0).toLocaleString() : '-'}</td>
                         </tr>
