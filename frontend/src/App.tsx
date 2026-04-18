@@ -28,7 +28,7 @@ interface Holding {
   premium_discount: string;
 }
 
-type SortField = 'etf_name' | 'etf_ticker' | 'listing_date' | 'nav' | 'fee' | 'weight';
+type SortField = 'etf_name' | 'listing_date' | 'nav' | 'fee' | 'weight';
 type SortOrder = 'asc' | 'desc';
 
 function App() {
@@ -44,10 +44,10 @@ function App() {
 
   // Pagination, Filtering, Sorting states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(10);
   const [filterQuery, setFilterQuery] = useState('');
   
-  // 초기 정렬을 NAV 내림차순으로 설정
+  // 초기 정렬: NAV 내림차순
   const [sortField, setSortField] = useState<SortField>('nav');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -77,7 +77,7 @@ function App() {
           const res = await fetch(`${apiBase}/suggestions?query=${encodeURIComponent(query)}`);
           const data = await res.json();
           setSuggestions(data);
-          // 검색 결과가 이미 나온 상태에서 타이핑할 때만 보여줌
+          // 검색 결과가 있는 상태에서만 드롭다운 표시
           if (data.length > 0) setShowSuggestions(true);
         } catch (err) {
           console.error("Failed to fetch suggestions", err);
@@ -97,7 +97,10 @@ function App() {
     setError(null);
     setCurrentPage(1);
     setFilterQuery('');
-    setShowSuggestions(false); // 검색 시작 시 드롭다운 닫기
+    
+    // 검색 실행 시 즉시 드롭다운 제거
+    setShowSuggestions(false);
+    setSuggestions([]);
 
     try {
       const response = await fetch(`${apiBase}/search?query=${encodeURIComponent(targetQuery)}`);
@@ -120,6 +123,8 @@ function App() {
     setFilterQuery('');
     setSortField('nav');
     setSortOrder('desc');
+    setShowSuggestions(false);
+    setSuggestions([]);
   };
 
   const handleETFClick = async (item: SearchResult) => {
@@ -139,8 +144,7 @@ function App() {
 
   const filteredResults = useMemo(() => {
     return results.filter(item => 
-      item.etf_name.toLowerCase().includes(filterQuery.toLowerCase()) ||
-      item.etf_ticker.toLowerCase().includes(filterQuery.toLowerCase())
+      item.etf_name.toLowerCase().includes(filterQuery.toLowerCase())
     );
   }, [results, filterQuery]);
 
@@ -223,7 +227,8 @@ function App() {
                     className="suggestion-item"
                     onClick={() => {
                       setQuery(s.name);
-                      setShowSuggestions(false); // 선택 시 닫기
+                      setShowSuggestions(false);
+                      setSuggestions([]);
                       handleSearch(s.name);
                     }}
                   >
@@ -250,22 +255,6 @@ function App() {
                 className="filter-input"
               />
             </div>
-            
-            <div className="pagination-controls hide-mobile">
-              <span>표시:</span>
-              <select 
-                value={itemsPerPage} 
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="page-select"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
           </div>
         )}
 
@@ -278,10 +267,7 @@ function App() {
                 <thead>
                   <tr>
                     <th onClick={() => toggleSort('etf_name')} className="sortable">
-                      ETF 정보 <SortIcon field="etf_name" />
-                    </th>
-                    <th onClick={() => toggleSort('etf_ticker')} className="sortable hide-mobile">
-                      티커 <SortIcon field="etf_ticker" />
+                      ETF 이름 <SortIcon field="etf_name" />
                     </th>
                     <th onClick={() => toggleSort('weight')} className="sortable">
                       비중 <SortIcon field="weight" />
@@ -301,12 +287,8 @@ function App() {
                   {currentItems.map((item, index) => (
                     <tr key={index}>
                       <td className="etf-name-cell" onClick={() => handleETFClick(item)}>
-                        <div className="name-wrapper">
-                          <span className="name-text">{item.etf_name}</span>
-                          <span className="ticker-text show-mobile">{item.etf_ticker}</span>
-                        </div>
+                        {item.etf_name}
                       </td>
-                      <td className="hide-mobile"><span className="ticker-badge">{item.etf_ticker}</span></td>
                       <td className="weight-cell">{item.weight ? `${item.weight}%` : '-'}</td>
                       <td className="fee-cell">{item.fee ? `${item.fee}%` : '-'}</td>
                       <td className="nav-cell">{formatNAV(item.nav)}</td>
@@ -348,7 +330,6 @@ function App() {
               <div className="modal-title-group">
                 <h2>{selectedETF.etf_name}</h2>
                 <div className="etf-meta-info">
-                  <span>티커: {selectedETF.etf_ticker}</span>
                   <span>상장일: {selectedETF.listing_date || '-'}</span>
                   <span>수수료: {selectedETF.fee}%</span>
                   <span>NAV: {formatNAV(selectedETF.nav)}백만</span>

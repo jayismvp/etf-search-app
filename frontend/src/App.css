@@ -119,6 +119,8 @@ body {
   font-size: 1.1rem;
   outline: none;
   transition: all 0.2s;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .primary-input:focus {
@@ -167,6 +169,10 @@ body {
   background-color: var(--input-bg);
 }
 
+.s-name {
+  font-weight: 500;
+}
+
 .s-ticker {
   background: #eee;
   padding: 2px 6px;
@@ -205,13 +211,6 @@ body {
 
 .etf-name-cell:hover {
   text-decoration: underline;
-}
-
-.ticker-badge {
-  background: #f0f0f0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
 }
 
 .weight-cell {
@@ -294,21 +293,6 @@ body {
   display: none;
 }
 
-.name-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ticker-text {
-  font-size: 0.8rem;
-  color: var(--secondary-color);
-  background: #f0f0f0;
-  padding: 2px 6px;
-  border-radius: 4px;
-  width: fit-content;
-}
-
 .etf-meta-info {
   display: flex;
   gap: 15px;
@@ -320,11 +304,10 @@ body {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .container {
-    padding: 20px 12px;
-  }
-
-  .main-header {
-    margin-bottom: 30px;
+    padding: 20px 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .main-header h1 {
@@ -337,37 +320,30 @@ body {
     font-size: 0.95rem;
   }
 
-  .search-section.sticky {
-    margin-bottom: 20px;
-    gap: 8px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .mini-title {
-    font-size: 1rem;
+  .search-section {
+    width: 100%;
+    padding: 0 4px;
+    box-sizing: border-box;
   }
 
   .primary-input {
-    padding: 10px 16px;
-    font-size: 0.85rem;
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
 
   .main-btn {
-    padding: 0 12px;
-    font-size: 0.85rem;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
 
   .hide-mobile {
     display: none !important;
   }
 
-  .show-mobile {
-    display: block !important;
-  }
-
   .results-section {
     width: 100%;
+    padding: 0;
     overflow-x: hidden;
   }
 
@@ -377,52 +353,50 @@ body {
   }
 
   .results-table th, .results-table td {
-    padding: 8px 4px;
+    padding: 8px 2px;
     font-size: 0.7rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
   }
 
-  /* 모바일 컬럼 너비 비율 고정 */
+  .results-table th:first-child, .results-table td:first-child {
+    text-align: left;
+    padding-left: 4px;
+  }
+
+  /* 컬럼 너비 비율 고정 (티커 삭제 반영) */
   .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 45%; } /* 이름 */
-  .results-table th:nth-child(3), .results-table td:nth-child(3) { width: 15%; } /* 비중 */
-  .results-table th:nth-child(4), .results-table td:nth-child(4) { width: 15%; } /* 수수료 */
-  .results-table th:nth-child(5), .results-table td:nth-child(5) { width: 25%; } /* NAV */
+  .results-table th:nth-child(2), .results-table td:nth-child(2) { width: 15%; } /* 비중 */
+  .results-table th:nth-child(3), .results-table td:nth-child(3) { width: 15%; } /* 수수료 */
+  .results-table th:nth-child(4), .results-table td:nth-child(4) { width: 25%; } /* NAV */
 
-  .name-text {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .ticker-text {
-    font-size: 0.65rem;
-  }
-
-  .pagination-nav {
-    margin-top: 20px;
-    gap: 10px;
+  .etf-name-cell {
+    white-space: normal !important;
+    word-break: keep-all;
+    line-height: 1.2;
+    font-size: 0.75rem !important;
   }
 
   .modal-content {
-    padding: 20px 15px;
-    width: 95%;
+    padding: 20px 12px;
+    width: 94%;
   }
 
   .modal-header h2 {
     font-size: 1rem;
+    line-height: 1.3;
   }
 
   .etf-meta-info {
     flex-direction: column;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     gap: 4px;
   }
 
   .holdings-table th, .holdings-table td {
-    padding: 8px 4px;
+    padding: 6px 2px;
     font-size: 0.7rem;
   }
 
@@ -431,7 +405,7 @@ body {
     color: #888;
     background: #f0f0f0;
     display: inline-block;
-    padding: 0 4px;
-    border-radius: 3px;
+    padding: 0 2px;
+    border-radius: 2px;
   }
 }
