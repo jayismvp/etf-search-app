@@ -194,7 +194,6 @@ function App() {
     const touchEndY = e.changedTouches[0].clientY;
     const deltaY = touchEndY - touchStartY.current;
     
-    // 리스트가 최상단에 있고, 아래로 150px 이상 썰어내렸을 때만 닫기
     const isAtTop = modalBodyRef.current ? modalBodyRef.current.scrollTop === 0 : true;
 
     if (isAtTop && deltaY > 150) {
@@ -358,7 +357,7 @@ function App() {
             
             <div className="modern-modal-header">
               <h3>{selectedETF.etf_name}</h3>
-              <p>상세 구성 종목 리스트</p>
+              <p>상세 구성 종목 리스트 ({holdings.length}개)</p>
             </div>
 
             <div className="modern-modal-body" ref={modalBodyRef}>
