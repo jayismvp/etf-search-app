@@ -52,6 +52,9 @@ function App() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
+  // Swipe logic state
+  const touchStartY = useRef<number>(0);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
@@ -179,6 +182,18 @@ function App() {
     if (!nav) return '-';
     const millions = Math.round(parseFloat(nav) / 1000000);
     return millions.toLocaleString();
+  };
+
+  // Touch handlers for sliding down to close
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    if (touchEndY - touchStartY.current > 100) { // 100px 이상 아래로 쓸어내리면 닫기
+      setSelectedETF(null);
+    }
   };
 
   return (
@@ -316,40 +331,36 @@ function App() {
       </main>
 
       {selectedETF && (
-        <div className="etf-modal-overlay" onClick={() => setSelectedETF(null)}>
-          <div className="etf-modal-window" onClick={(e) => e.stopPropagation()}>
-            <div className="etf-modal-header">
-              <div className="etf-modal-title">
-                <h2>{selectedETF.etf_name}</h2>
-                <p>구성 종목 {holdings.length}개</p>
-              </div>
-              <button className="etf-modal-close" onClick={() => setSelectedETF(null)}>&times;</button>
-            </div>
+        <div className="modern-modal-overlay" onClick={() => setSelectedETF(null)}>
+          <div 
+            className="modern-modal-content" 
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="modal-drag-handle"></div>
             
-            <div className="etf-modal-body">
+            <div className="modern-modal-header">
+              <h3>{selectedETF.etf_name}</h3>
+              <p>Top Holdings</p>
+            </div>
+
+            <div className="modern-modal-body">
               {isModalLoading ? (
-                <div className="etf-modal-loader">데이터 로딩 중...</div>
+                <div className="modal-shimmer">로딩 중...</div>
               ) : (
-                <div className="etf-holdings-container">
-                  <table className="etf-holdings-table">
-                    <thead>
-                      <tr>
-                        <th>종목명</th>
-                        <th>비중</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {holdings.map((h, i) => (
-                        <tr key={i}>
-                          <td className="holdings-stock-name">{h.stock_name}</td>
-                          <td className="holdings-weight">{h.weight}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="holdings-minimal-list">
+                  {holdings.map((h, i) => (
+                    <div className="holding-row" key={i}>
+                      <div className="holding-stock-name">{h.stock_name}</div>
+                      <div className="holding-weight">{h.weight}%</div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
+            
+            <button className="modal-bottom-close" onClick={() => setSelectedETF(null)}>닫기</button>
           </div>
         </div>
       )}
