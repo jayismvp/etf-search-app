@@ -47,7 +47,6 @@ function App() {
   const [itemsPerPage] = useState(10);
   const [filterQuery, setFilterQuery] = useState('');
   
-  // 초기 정렬: NAV 내림차순
   const [sortField, setSortField] = useState<SortField>('nav');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -56,7 +55,6 @@ function App() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
-  // Handle outside click for suggestions
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
@@ -69,7 +67,6 @@ function App() {
 
   const apiBase = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '/api';
 
-  // Fetch suggestions
   useEffect(() => {
     if (query.trim().length > 0 && !isLoading) {
       const delayDebounce = setTimeout(async () => {
@@ -96,7 +93,6 @@ function App() {
     setError(null);
     setCurrentPage(1);
     setFilterQuery('');
-    
     setShowSuggestions(false);
     setSuggestions([]);
 
@@ -190,8 +186,6 @@ function App() {
 
   return (
     <div className={`container ${results.length > 0 ? 'has-results' : 'landing'}`}>
-      {/* 홈 버튼 제거됨 */}
-      
       {results.length === 0 && (
         <header className="main-header">
           <h1>ETF Finder</h1>
@@ -201,7 +195,6 @@ function App() {
 
       <main>
         <div className={`search-section ${results.length > 0 ? 'sticky' : 'centered'}`}>
-          {/* mini-title 클릭 시 홈으로 이동하도록 수정 */}
           {results.length > 0 && (
             <h2 className="mini-title" onClick={handleHome} title="처음으로 돌아가기">
               ETF Finder
@@ -328,39 +321,57 @@ function App() {
       {selectedETF && (
         <div className="modal-overlay" onClick={() => setSelectedETF(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedETF(null)}>&times;</button>
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <h2>{selectedETF.etf_name}</h2>
-                <div className="etf-meta-info">
-                  <span>상장일: {selectedETF.listing_date || '-'}</span>
-                  <span>수수료: {selectedETF.fee}%</span>
-                  <span>NAV: {formatNAV(selectedETF.nav)}백만</span>
+            <div className="modal-top-bar">
+              <button className="modal-close-icon" onClick={() => setSelectedETF(null)}>&times;</button>
+            </div>
+            
+            <div className="modal-header-new">
+              <div className="etf-badge">ETF DETAIL</div>
+              <h2>{selectedETF.etf_name}</h2>
+              <div className="etf-summary-cards">
+                <div className="summary-card">
+                  <span className="label">NAV(백만)</span>
+                  <span className="value">{formatNAV(selectedETF.nav)}</span>
+                </div>
+                <div className="summary-card">
+                  <span className="label">총수수료</span>
+                  <span className="value">{selectedETF.fee}%</span>
+                </div>
+                <div className="summary-card">
+                  <span className="label">상장일</span>
+                  <span className="value">{selectedETF.listing_date || '-'}</span>
                 </div>
               </div>
             </div>
-            <div className="modal-body">
+
+            <div className="modal-body-new">
+              <h3 className="section-title">구성 종목 Top Holdings</h3>
               {isModalLoading ? (
-                <div className="modal-loading">로딩 중...</div>
+                <div className="modal-loading-new">
+                  <div className="spinner"></div>
+                  <p>데이터를 불러오는 중입니다...</p>
+                </div>
               ) : (
-                <div className="holdings-table-container">
-                  <table className="holdings-table">
+                <div className="holdings-list-new">
+                  <table className="holdings-table-new">
                     <thead>
                       <tr>
                         <th>종목명</th>
+                        <th className="hide-mobile">티커</th>
                         <th>비중</th>
-                        <th className="hide-mobile">금액</th>
+                        <th className="hide-mobile">금액(백만)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {holdings.map((h, i) => (
                         <tr key={i}>
-                          <td className="stock-name-cell">
+                          <td className="stock-name">
                             {h.stock_name}
-                            <div className="show-mobile small-ticker">{h.stock_ticker}</div>
+                            <span className="show-mobile stock-ticker-mini">{h.stock_ticker}</span>
                           </td>
-                          <td className="weight-cell">{h.weight}%</td>
-                          <td className="hide-mobile">{h.amount ? parseInt(h.amount).toLocaleString() : '-'}</td>
+                          <td className="hide-mobile"><span className="ticker-badge-mini">{h.stock_ticker}</span></td>
+                          <td className="weight-highlight">{h.weight}%</td>
+                          <td className="hide-mobile">{h.amount ? (parseInt(h.amount)/1000000).toFixed(0).toLocaleString() : '-'}</td>
                         </tr>
                       ))}
                     </tbody>
