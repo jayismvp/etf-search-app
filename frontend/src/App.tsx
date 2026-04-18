@@ -344,7 +344,6 @@ function App() {
                       <tr>
                         <th>종목명</th>
                         <th>비중</th>
-                        <th className="hide-mobile">금액(백만)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -352,10 +351,8 @@ function App() {
                         <tr key={i}>
                           <td className="stock-name">
                             {h.stock_name}
-                            <span className="show-mobile stock-ticker-mini">{h.stock_ticker}</span>
                           </td>
                           <td className="weight-highlight">{h.weight}%</td>
-                          <td className="hide-mobile">{h.amount ? (parseInt(h.amount)/1000000).toFixed(0).toLocaleString() : '-'}</td>
                         </tr>
                       ))}
                     </tbody>
