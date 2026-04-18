@@ -8,7 +8,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const query = url.searchParams.get('query');
 
   try {
-    // 1. 검색어가 없거나 빈 경우: 전체 ETF 목록 반환 (유니크한 ETF 378종)
+    // 1. 전체보기: 검색어가 비어있는 경우
     if (!query || query.trim() === "") {
       const { results } = await env.DB.prepare(`
         SELECT 
@@ -30,9 +30,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       });
     }
 
-    const lowerQuery = query.toLowerCase();
+    const searchQuery = query.trim();
 
-    // 2. 검색어가 있는 경우: 오직 '주식 종목명'과 '종목 티커'에서만 검색 (ETF 이름 제외)
+    // 2. 정확한 검색: LIKE 대신 = 를 사용하여 정확히 일치하는 종목명 또는 티커만 필터링
     const { results } = await env.DB.prepare(`
       SELECT 
         stock_name, 
@@ -44,10 +44,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         fee, 
         weight 
       FROM stocks 
-      WHERE lower(stock_name) LIKE ? 
-         OR lower(stock_ticker) LIKE ?
+      WHERE stock_name = ? 
+         OR stock_ticker = ?
       ORDER BY nav DESC
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
+    `).bind(searchQuery, searchQuery).all();
 
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }

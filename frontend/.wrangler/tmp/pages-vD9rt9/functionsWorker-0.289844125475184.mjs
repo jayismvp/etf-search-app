@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../.wrangler/tmp/bundle-2eN8fk/checked-fetch.js
+// ../.wrangler/tmp/bundle-IJYMaB/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -87,7 +87,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
         headers: { "Content-Type": "application/json" }
       });
     }
-    const lowerQuery = query.toLowerCase();
+    const searchQuery = query.trim();
     const { results } = await env.DB.prepare(`
       SELECT 
         stock_name, 
@@ -99,10 +99,10 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
         fee, 
         weight 
       FROM stocks 
-      WHERE lower(stock_name) LIKE ? 
-         OR lower(stock_ticker) LIKE ?
+      WHERE stock_name = ? 
+         OR stock_ticker = ?
       ORDER BY nav DESC
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
+    `).bind(searchQuery, searchQuery).all();
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }
     });
@@ -659,7 +659,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-2eN8fk/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-IJYMaB/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -691,7 +691,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-2eN8fk/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-IJYMaB/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

@@ -112,7 +112,7 @@ var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
         headers: { "Content-Type": "application/json" }
       });
     }
-    const lowerQuery = query.toLowerCase();
+    const searchQuery = query.trim();
     const { results } = await env.DB.prepare(`
       SELECT 
         stock_name, 
@@ -124,10 +124,10 @@ var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
         fee, 
         weight 
       FROM stocks 
-      WHERE lower(stock_name) LIKE ? 
-         OR lower(stock_ticker) LIKE ?
+      WHERE stock_name = ? 
+         OR stock_ticker = ?
       ORDER BY nav DESC
-    `).bind(`%${lowerQuery}%`, `%${lowerQuery}%`).all();
+    `).bind(searchQuery, searchQuery).all();
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }
     });
